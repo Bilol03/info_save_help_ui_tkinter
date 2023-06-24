@@ -5,6 +5,23 @@ from tkinter import messagebox
 import pyperclip
 import string
 from random import *
+import json
+
+
+
+#----------------------------- SEACHING FUNCTION -------------------------------- #
+def search():
+    website = web_input.get()
+
+    if len(website) == 0:
+        messagebox.showerror("Error", "Please enter the website you are searching for!")
+    else:
+        with open('data.json', 'r') as file:
+            datas = json.load(file)
+        try:
+            messagebox.showinfo("Your info", f"Email: {datas[website]['email']} \nPassword: {datas[website]['password']}")
+        except KeyError:
+            messagebox.showerror("Error", "There is no like this data!!!")
 # ---------------------------- PASSWORD GENERATOR ------------------------------- #
 def generator():
     nr_letters = randint(5, 10)
@@ -13,7 +30,6 @@ def generator():
 
     if paswd_input.get != "":
         paswd_input.delete(0, END)
-    length = randint(8, 15)
     res = []
     for i in range(nr_letters):
         res.append(choice(string.ascii_letters))
@@ -28,25 +44,45 @@ def generator():
 
 # ---------------------------- SAVE PASSWORD ------------------------------- #
 def save_password():
-    file = open('data.txt', 'a')
     website = web_input.get()
     password = paswd_input.get()
     email = email_input.get()
 
+    new_data = {
+        website: {
+            "email": email,
+            "password": password
+        }
+    }
 
     if website == "":
         messagebox.showerror(title="Oops", message="Please fill the website input!!!")
     elif paswd_input == "":
         messagebox.showerror(title="Oops", message="Please enter the password!!!")
     else:
-        file.write(f"{website}  |  {email}  |  {password} \n")
-        web_input.delete(0, END)
-        password.delete(0, END)
+
+        try:
+            with open("data.json", "r") as file:
+                data = json.load(file)
+                print(data, "sdfad")
+
+        except:
+            file = open('data.json', 'w')
+            json.dump(new_data, file, indent=4)
+        else:
+            data.update(new_data)
+            with open("data.json", "w") as file:
+                json.dump(data, file, indent=4)
+        finally:
+            web_input.delete(0, END)
+            paswd_input.delete(0, END)
+
 
 
 
 
 # ---------------------------- UI SETUP ------------------------------- #
+
 
 window = Tk()
 window.title('Password Generator')
@@ -61,8 +97,11 @@ canvas.grid(row=0, column=1)
 web_title = Label(text='Website:', highlightthickness=0, background='white', fg='black', font=('Roboto sans-serif', 13))
 web_title.grid(column=0, row=1)
 
-web_input = Entry(width=35, highlightbackground='white', fg='black', bg='white')
-web_input.grid(column=1, row=1, columnspan=2)
+web_input = Entry(width=20, highlightbackground='white', fg='black', bg='white')
+web_input.grid(column=1, row=1)
+
+search_button = Button(width=10, text='Search', fg='black', highlightthickness=0, highlightbackground='white', command=search)
+search_button.grid(column=2, row=1)
 
 email_username = Label(text='Email/Username:', highlightthickness=0, bg='white', fg='black', font=('Roboto sans-serif', 13))
 email_username.grid(column=0, row=2)
